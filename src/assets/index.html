@@ -29,14 +29,14 @@
                         :aria-pressed="filterSelected == 'unread'"
                         :title="$t('unread')"
                         @click="filterSelected = 'unread'">
-                    <span class="icon">{% inline "circle-full.svg" %}</span>
+                    <span class="icon icon-unread">{% inline "circle-full.svg" %}</span>
                 </button>
                 <button class="toolbar-item mx-1"
                         :class="{active: filterSelected == 'starred'}"
                         :aria-pressed="filterSelected == 'starred'"
                         :title="$t('starred')"
                         @click="filterSelected = 'starred'">
-                    <span class="icon">{% inline "star-full.svg" %}</span>
+                    <span class="icon icon-starred">{% inline "star-full.svg" %}</span>
                 </button>
                 <button class="toolbar-item mr-1"
                         :class="{active: filterSelected == ''}"
@@ -292,8 +292,8 @@
                     <div class="selectgroup-label d-flex flex-column">
                         <div style="line-height: 100%; opacity: .7; margin-bottom: .1rem;" class="d-flex align-items-center">
                             <transition name="indicator">
-                                <span class="icon icon-small mr-1" v-if="item.status=='unread'">{% inline "circle-full.svg" %}</span>
-                                <span class="icon icon-small mr-1" v-if="item.status=='starred'">{% inline "star-full.svg" %}</span>
+                                <span class="icon icon-small icon-unread mr-1" v-if="item.status=='unread'">{% inline "circle-full.svg" %}</span>
+                                <span class="icon icon-small icon-starred mr-1" v-if="item.status=='starred'">{% inline "star-full.svg" %}</span>
                             </transition>
                             <small class="flex-fill text-truncate mr-1">
                                 {{ (feedsById[item.feed_id] || {}).title }}
@@ -315,14 +315,14 @@
                 <button class="toolbar-item"
                         @click="toggleItemStarred(itemSelectedDetails)"
                         :title="$t('mark_starred')">
-                    <span class="icon" v-if="itemSelectedDetails.status=='starred'" >{% inline "star-full.svg" %}</span>
-                    <span class="icon" v-else-if="itemSelectedDetails.status!='starred'" >{% inline "star.svg" %}</span>
+                    <span class="icon icon-starred" v-if="itemSelectedDetails.status=='starred'" >{% inline "star-full.svg" %}</span>
+                    <span class="icon icon-starred" v-else-if="itemSelectedDetails.status!='starred'" >{% inline "star.svg" %}</span>
                 </button>
                 <button class="toolbar-item"
                         :title="$t('mark_unread')"
                         @click="toggleItemRead(itemSelectedDetails)">
-                    <span class="icon" v-if="itemSelectedDetails.status=='unread'">{% inline "circle-full.svg" %}</span>
-                    <span class="icon" v-if="itemSelectedDetails.status!='unread'">{% inline "circle.svg" %}</span>
+                    <span class="icon icon-unread" v-if="itemSelectedDetails.status=='unread'">{% inline "circle-full.svg" %}</span>
+                    <span class="icon icon-unread" v-if="itemSelectedDetails.status!='unread'">{% inline "circle.svg" %}</span>
                 </button>
                 <dropdown class="settings-dropdown" toggle-class="toolbar-item px-2" drop="center" :title="$t('appearance')">
                     <template v-slot:button>
