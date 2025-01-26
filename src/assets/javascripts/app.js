@@ -1,3 +1,5 @@
+const { createApp, nextTick } = Vue
+
 'use strict';
 
 var TITLE = document.title
@@ -33,7 +35,7 @@ var debounce = function(callback, wait) {
   }
 }
 
-var vm = new Vue({
+const app = createApp({
   created: function() {
     this.refreshStats()
       .then(this.refreshFeeds.bind(this))
@@ -44,7 +46,7 @@ var vm = new Vue({
     })
   },
   data: function() {
-    var s = app.settings
+    var s = window.app.settings
     return {
       'filterSelected': s.filter,
       'folders': [],
@@ -281,7 +283,7 @@ var vm = new Vue({
         vm.loading.items = false
 
         // load more if there's some space left at the bottom of the item list.
-        vm.$nextTick(function() {
+        nextTick(function() {
           if (vm.itemsHasMore && !vm.loading.items && vm.itemListCloseToBottom()) {
             vm.refreshItems(true)
           }
@@ -350,7 +352,7 @@ var vm = new Vue({
       if (!title) return
       api.folders.create({'title': title}).then(function(result) {
         vm.refreshFeeds().then(function() {
-          vm.$nextTick(function() {
+          nextTick(function() {
             if (vm.$refs.newFeedFolder) {
               vm.$refs.newFeedFolder.value = result.id
             }
@@ -551,7 +553,7 @@ var vm = new Vue({
 
       vm.itemSelected = vm.items[newPosition].id
 
-      vm.$nextTick(function() {
+      nextTick(function() {
         var scroll = document.querySelector('#item-list-scroll')
 
         var handle = scroll.querySelector('input[type=radio]:checked')
@@ -581,7 +583,7 @@ var vm = new Vue({
 
       vm.feedSelected = navigationList[newPosition]
 
-      vm.$nextTick(function() {
+      nextTick(function() {
         var scroll = document.querySelector('#feed-list-scroll')
 
         var handle = scroll.querySelector('input[type=radio]:checked')
@@ -593,21 +595,21 @@ var vm = new Vue({
   }
 })
 
-Vue.directive('scroll', {
-  inserted: function(el, binding) {
+app.directive('scroll', {
+  updated: function(el, binding) {
     el.addEventListener('scroll', debounce(function(event) {
       binding.value(event, el)
     }, 200))
   },
 })
 
-Vue.directive('focus', {
-  inserted: function(el) {
+app.directive('focus', {
+  updated: function(el) {
     el.focus()
   }
 })
 
-Vue.component('drag', {
+app.component('drag', {
   props: ['width'],
   template: '<div class="drag"></div>',
   mounted: function() {
@@ -632,7 +634,7 @@ Vue.component('drag', {
   },
 })
 
-Vue.component('dropdown', {
+app.component('dropdown', {
   props: ['class', 'toggle-class', 'ref', 'drop', 'title'],
   data: function() {
     return {open: false}
@@ -664,7 +666,7 @@ Vue.component('dropdown', {
         this.$refs.menu.style.left = 'auto'
         this.$refs.menu.style.right = '0'
       } else if (drop === 'center') {
-        this.$nextTick(function() {
+        nextTick(function() {
           var btnWidth = this.$refs.btn.getBoundingClientRect().width
           var menuWidth = this.$refs.menu.getBoundingClientRect().width
           this.$refs.menu.style.left = '-' + ((menuWidth - btnWidth) / 2) + 'px'
@@ -685,7 +687,7 @@ Vue.component('dropdown', {
   },
 })
 
-Vue.component('modal', {
+app.component('modal', {
   props: ['open'],
   template: `
     <div class="modal custom-modal" tabindex="-1" v-if="$props.open">
@@ -741,7 +743,7 @@ function dateRepr(d) {
   return out
 }
 
-Vue.component('relative-time', {
+app.component('relative-time', {
   props: ['val'],
   data: function() {
     var d = new Date(this.val)
@@ -762,4 +764,4 @@ Vue.component('relative-time', {
   },
 })
 
-vm.$mount('#app')
+const vm = app.mount('#app')
