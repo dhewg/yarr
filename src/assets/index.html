@@ -16,9 +16,9 @@
     </script>
 </head>
 <body class="theme-{% .settings.theme_name %}">
-    <div id="app" class="d-flex" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" v-cloak>
+    <div id="app" class="d-flex" v-cloak>
         <!-- feed list -->
-        <div id="col-feed-list" class="vh-100 position-relative d-flex flex-column border-right flex-shrink-0" :style="{width: feedListWidth+'px'}">
+        <div id="col-feed-list" class="vh-100 position-relative d-flex flex-column border-right flex-shrink-0" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" :style="{width: feedListWidth+'px'}">
             <drag :width="feedListWidth" @resize="resizeFeedList"></drag>
             <div class="p-2 toolbar d-flex align-items-center">
                 <div class="icon mx-2">{% inline "anchor.svg" %}</div>
@@ -174,7 +174,7 @@
             </div>
         </div>
         <!-- item list -->
-        <div id="col-item-list" class="vh-100 position-relative d-flex flex-column border-right flex-shrink-0" :style="{width: itemListWidth+'px'}">
+        <div id="col-item-list" class="vh-100 position-relative d-flex flex-column border-right flex-shrink-0" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" :style="{width: itemListWidth+'px'}">
             <drag :width="itemListWidth" @resize="resizeItemList"></drag>
             <div class="px-2 toolbar d-flex align-items-center">
                 <button class="toolbar-item mr-2 d-block d-md-none"
@@ -292,7 +292,7 @@
             </div>
         </div>
         <!-- item show -->
-        <div id="col-item" class="vh-100 d-flex flex-column w-100" style="min-width: 0;">
+        <div id="col-item" class="vh-100 d-flex flex-column w-100" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" style="min-width: 0;">
             <div class="toolbar px-2 d-flex align-items-center" v-if="itemSelectedDetails">
                 <button class="toolbar-item"
                         @click="toggleItemStarred(itemSelectedDetails)"
