@@ -33,175 +33,6 @@ var debounce = function(callback, wait) {
   }
 }
 
-Vue.directive('scroll', {
-  inserted: function(el, binding) {
-    el.addEventListener('scroll', debounce(function(event) {
-      binding.value(event, el)
-    }, 200))
-  },
-})
-
-Vue.directive('focus', {
-  inserted: function(el) {
-    el.focus()
-  }
-})
-
-Vue.component('drag', {
-  props: ['width'],
-  template: '<div class="drag"></div>',
-  mounted: function() {
-    var self = this
-    var startX = undefined
-    var initW = undefined
-    var onMouseMove = function(e) {
-      var offset = e.clientX - startX
-      var newWidth = initW + offset
-      self.$emit('resize', newWidth)
-    }
-    var onMouseUp = function(e) {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
-    }
-    this.$el.addEventListener('mousedown', function(e) {
-      startX = e.clientX
-      initW = self.width
-      document.addEventListener('mousemove', onMouseMove)
-      document.addEventListener('mouseup', onMouseUp)
-    })
-  },
-})
-
-Vue.component('dropdown', {
-  props: ['class', 'toggle-class', 'ref', 'drop', 'title'],
-  data: function() {
-    return {open: false}
-  },
-  template: `
-    <div class="dropdown" :class="$attrs.class">
-      <button ref="btn" @click="toggle" :class="btnToggleClass" :title="$props.title"><slot name="button"></slot></button>
-      <div ref="menu" class="dropdown-menu" :class="{show: open}"><slot v-if="open"></slot></div>
-    </div>
-  `,
-  computed: {
-    btnToggleClass: function() {
-      var c = this.$props.toggleClass || ''
-      c += ' dropdown-toggle dropdown-toggle-no-caret'
-      c += this.open ? ' show' : ''
-      return c.trim()
-    }
-  },
-  methods: {
-    toggle: function(e) {
-      this.open ? this.hide() : this.show()
-    },
-    show: function(e) {
-      this.open = true
-      this.$refs.menu.style.top = this.$refs.btn.offsetHeight + 'px'
-      var drop = this.$props.drop
-
-      if (drop === 'right') {
-        this.$refs.menu.style.left = 'auto'
-        this.$refs.menu.style.right = '0'
-      } else if (drop === 'center') {
-        this.$nextTick(function() {
-          var btnWidth = this.$refs.btn.getBoundingClientRect().width
-          var menuWidth = this.$refs.menu.getBoundingClientRect().width
-          this.$refs.menu.style.left = '-' + ((menuWidth - btnWidth) / 2) + 'px'
-        }.bind(this))
-      }
-
-      document.addEventListener('click', this.clickHandler)
-    },
-    hide: function() {
-      this.open = false
-      document.removeEventListener('click', this.clickHandler)
-    },
-    clickHandler: function(e) {
-      var dropdown = e.target.closest('.dropdown')
-      if (dropdown == null || dropdown != this.$el) return this.hide()
-      if (e.target.closest('.dropdown-item') != null) return this.hide()
-    }
-  },
-})
-
-Vue.component('modal', {
-  props: ['open'],
-  template: `
-    <div class="modal custom-modal" tabindex="-1" v-if="$props.open">
-      <div class="modal-dialog">
-        <div class="modal-content" ref="content">
-          <div class="modal-body">
-            <slot v-if="$props.open"></slot>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  data: function() {
-    return {opening: false}
-  },
-  watch: {
-    'open': function(newVal) {
-      if (newVal) {
-        this.opening = true
-        document.addEventListener('click', this.handleClick)
-      } else {
-        document.removeEventListener('click', this.handleClick)
-      }
-    },
-  },
-  methods: {
-    handleClick: function(e) {
-      if (this.opening) {
-        this.opening = false
-        return
-      }
-      if (e.target.closest('.modal-content') == null) this.$emit('hide')
-    },
-  },
-})
-
-function dateRepr(d) {
-  var sec = (new Date().getTime() - d.getTime()) / 1000
-  var neg = sec < 0
-  var out = ''
-
-  sec = Math.abs(sec)
-  if (sec < 2700)  // less than 45 minutes
-    out = Math.round(sec / 60) + 'm'
-  else if (sec < 86400)  // less than 24 hours
-    out = Math.round(sec / 3600) + 'h'
-  else if (sec < 604800)  // less than a week
-    out = Math.round(sec / 86400) + 'd'
-  else
-    out = d.toLocaleDateString(undefined, {year: "numeric", month: "long", day: "numeric"})
-
-  if (neg) return '-' + out
-  return out
-}
-
-Vue.component('relative-time', {
-  props: ['val'],
-  data: function() {
-    var d = new Date(this.val)
-    return {
-      'date': d,
-      'formatted': dateRepr(d),
-      'interval': null,
-    }
-  },
-  template: '<time :datetime="val">{{ formatted }}</time>',
-  mounted: function() {
-    this.interval = setInterval(function() {
-      this.formatted = dateRepr(this.date)
-    }.bind(this), 600000)  // every 10 minutes
-  },
-  destroyed: function() {
-    clearInterval(this.interval)
-  },
-})
-
 var vm = new Vue({
   created: function() {
     this.refreshStats()
@@ -760,6 +591,175 @@ var vm = new Vue({
       })
     },
   }
+})
+
+Vue.directive('scroll', {
+  inserted: function(el, binding) {
+    el.addEventListener('scroll', debounce(function(event) {
+      binding.value(event, el)
+    }, 200))
+  },
+})
+
+Vue.directive('focus', {
+  inserted: function(el) {
+    el.focus()
+  }
+})
+
+Vue.component('drag', {
+  props: ['width'],
+  template: '<div class="drag"></div>',
+  mounted: function() {
+    var self = this
+    var startX = undefined
+    var initW = undefined
+    var onMouseMove = function(e) {
+      var offset = e.clientX - startX
+      var newWidth = initW + offset
+      self.$emit('resize', newWidth)
+    }
+    var onMouseUp = function(e) {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+    this.$el.addEventListener('mousedown', function(e) {
+      startX = e.clientX
+      initW = self.width
+      document.addEventListener('mousemove', onMouseMove)
+      document.addEventListener('mouseup', onMouseUp)
+    })
+  },
+})
+
+Vue.component('dropdown', {
+  props: ['class', 'toggle-class', 'ref', 'drop', 'title'],
+  data: function() {
+    return {open: false}
+  },
+  template: `
+    <div class="dropdown" :class="$attrs.class">
+      <button ref="btn" @click="toggle" :class="btnToggleClass" :title="$props.title"><slot name="button"></slot></button>
+      <div ref="menu" class="dropdown-menu" :class="{show: open}"><slot v-if="open"></slot></div>
+    </div>
+  `,
+  computed: {
+    btnToggleClass: function() {
+      var c = this.$props.toggleClass || ''
+      c += ' dropdown-toggle dropdown-toggle-no-caret'
+      c += this.open ? ' show' : ''
+      return c.trim()
+    }
+  },
+  methods: {
+    toggle: function(e) {
+      this.open ? this.hide() : this.show()
+    },
+    show: function(e) {
+      this.open = true
+      this.$refs.menu.style.top = this.$refs.btn.offsetHeight + 'px'
+      var drop = this.$props.drop
+
+      if (drop === 'right') {
+        this.$refs.menu.style.left = 'auto'
+        this.$refs.menu.style.right = '0'
+      } else if (drop === 'center') {
+        this.$nextTick(function() {
+          var btnWidth = this.$refs.btn.getBoundingClientRect().width
+          var menuWidth = this.$refs.menu.getBoundingClientRect().width
+          this.$refs.menu.style.left = '-' + ((menuWidth - btnWidth) / 2) + 'px'
+        }.bind(this))
+      }
+
+      document.addEventListener('click', this.clickHandler)
+    },
+    hide: function() {
+      this.open = false
+      document.removeEventListener('click', this.clickHandler)
+    },
+    clickHandler: function(e) {
+      var dropdown = e.target.closest('.dropdown')
+      if (dropdown == null || dropdown != this.$el) return this.hide()
+      if (e.target.closest('.dropdown-item') != null) return this.hide()
+    }
+  },
+})
+
+Vue.component('modal', {
+  props: ['open'],
+  template: `
+    <div class="modal custom-modal" tabindex="-1" v-if="$props.open">
+      <div class="modal-dialog">
+        <div class="modal-content" ref="content">
+          <div class="modal-body">
+            <slot v-if="$props.open"></slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  data: function() {
+    return {opening: false}
+  },
+  watch: {
+    'open': function(newVal) {
+      if (newVal) {
+        this.opening = true
+        document.addEventListener('click', this.handleClick)
+      } else {
+        document.removeEventListener('click', this.handleClick)
+      }
+    },
+  },
+  methods: {
+    handleClick: function(e) {
+      if (this.opening) {
+        this.opening = false
+        return
+      }
+      if (e.target.closest('.modal-content') == null) this.$emit('hide')
+    },
+  },
+})
+
+function dateRepr(d) {
+  var sec = (new Date().getTime() - d.getTime()) / 1000
+  var neg = sec < 0
+  var out = ''
+
+  sec = Math.abs(sec)
+  if (sec < 2700)  // less than 45 minutes
+    out = Math.round(sec / 60) + 'm'
+  else if (sec < 86400)  // less than 24 hours
+    out = Math.round(sec / 3600) + 'h'
+  else if (sec < 604800)  // less than a week
+    out = Math.round(sec / 86400) + 'd'
+  else
+    out = d.toLocaleDateString(undefined, {year: "numeric", month: "long", day: "numeric"})
+
+  if (neg) return '-' + out
+  return out
+}
+
+Vue.component('relative-time', {
+  props: ['val'],
+  data: function() {
+    var d = new Date(this.val)
+    return {
+      'date': d,
+      'formatted': dateRepr(d),
+      'interval': null,
+    }
+  },
+  template: '<time :datetime="val">{{ formatted }}</time>',
+  mounted: function() {
+    this.interval = setInterval(function() {
+      this.formatted = dateRepr(this.date)
+    }.bind(this), 600000)  // every 10 minutes
+  },
+  destroyed: function() {
+    clearInterval(this.interval)
+  },
 })
 
 vm.$mount('#app')
