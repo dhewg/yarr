@@ -227,8 +227,7 @@
                     <div class="dropdown-divider"></div>
                     <header class="dropdown-header">Move to...</header>
                     <button class="dropdown-item"
-                        v-if="folder.id != current.feed.folder_id"
-                        v-for="folder in folders"
+                        v-for="folder in folders.filter(x => x.id != current.feed.folder_id)"
                         @click="moveFeed(current.feed, folder)">
                         <span class="icon mr-1">{% inline "folder.svg" %}</span>
                         {{ folder.title }}
