@@ -363,10 +363,10 @@
     }
   }
   exports.i18n = {
-    install(Vue, opts) {
+    install(app, opts) {
       const x = new i18n();
-      Vue.prototype.$t = x.$t
-      Vue.prototype.$setLang = x.setLang
+      app.config.globalProperties.$t = x.$t
+      app.config.globalProperties.$setLang = x.setLang
     }
   }
 })(window)
