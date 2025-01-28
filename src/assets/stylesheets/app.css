@@ -367,11 +367,6 @@ select.form-control:not([multiple]):not([size]) {
   line-height: 1.5;
 }
 
-.content-wrapper {
-  max-width: 60rem;
-  margin: 0 auto;
-}
-
 .content img, .content video {
   max-width: 100%;
   height: auto;
