@@ -362,7 +362,7 @@
                  class="content px-4 pt-3 pb-5 border-top overflow-auto scroll-touch"
                  :class="{'font-serif': theme.font == 'serif', 'font-monospace': theme.font == 'monospace'}"
                  :style="{'font-size': theme.size + 'rem'}">
-                <div class="content-wrapper">
+                <!--- <div class="content-wrapper"> -->
                     <h1><b>{{ itemSelectedDetails.title || $t('untitled') }}</b></h1>
                     <div class="text-muted">
                         <div>
@@ -384,7 +384,7 @@
                         <video class="w-100" controls v-for="media in contentVideos" :src="media.url"></video>
                     </div>
                     <div v-html="itemSelectedContent"></div>
-                </div>
+                <!--- </div> -->
             </div>
         </div>
         <modal :open="!!settings" @hide="settings = ''">
