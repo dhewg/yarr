@@ -86,6 +86,7 @@ type ItemFilter struct {
 	FeedID   *int64
 	Status   *ItemStatus
 	Search   *string
+	Newer    *int64
 	After    *int64
 	IDs      *[]int64
 	SinceID  *int64
@@ -212,6 +213,10 @@ func listQueryPredicate(filter ItemFilter, newestFirst bool) (string, []any) {
 			),
 		)
 		args = append(args, sql.Named("after_id", *filter.After))
+	}
+	if filter.Newer != nil {
+		cond = append(cond, "(i.date_arrived, i.id) > (select date_arrived, id from items where id = ?)")
+		args = append(args, *filter.Newer)
 	}
 	if filter.IDs != nil && len(*filter.IDs) > 0 {
 		qmarks := make([]string, len(*filter.IDs))
