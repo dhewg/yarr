@@ -62,6 +62,7 @@ type ItemFilter struct {
 	FeedID   *int64
 	Status   *ItemStatus
 	Search   *string
+	Newer    *int64
 	After    *int64
 	IDs      *[]int64
 	SinceID  *int64
@@ -167,6 +168,14 @@ func listQueryPredicate(filter ItemFilter, newestFirst bool) (string, []interfac
 		}
 		cond = append(cond, fmt.Sprintf("(i.date, i.id) %s (select date, id from items where id = ?)", compare))
 		args = append(args, *filter.After)
+	}
+	if filter.Newer != nil {
+		compare := "<"
+		if newestFirst {
+			compare = ">"
+		}
+		cond = append(cond, fmt.Sprintf("(i.date_arrived, i.id) %s (select date_arrived, id from items where id = ?)", compare))
+		args = append(args, *filter.Newer)
 	}
 	if filter.IDs != nil && len(*filter.IDs) > 0 {
 		qmarks := make([]string, len(*filter.IDs))

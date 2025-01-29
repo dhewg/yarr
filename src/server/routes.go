@@ -359,6 +359,9 @@ func (s *Server) handleItemList(c *router.Context) {
 		if feedID, err := c.QueryInt64("feed_id"); err == nil {
 			filter.FeedID = &feedID
 		}
+		if newer, err := c.QueryInt64("newer"); err == nil {
+			filter.Newer = &newer
+		}
 		if after, err := c.QueryInt64("after"); err == nil {
 			filter.After = &after
 		}
