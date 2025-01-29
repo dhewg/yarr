@@ -284,9 +284,7 @@ const app = createApp({
 
         // load more if there's some space left at the bottom of the item list.
         nextTick(function() {
-          if (vm.itemsHasMore && !vm.loading.items && vm.itemListCloseToBottom()) {
-            vm.refreshItems(true)
-          }
+          vm.loadMoreItems(true)
         })
       })
     },
