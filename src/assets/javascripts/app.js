@@ -788,7 +788,7 @@ app.component('relative-time', {
   mounted: function() {
     this.interval = setInterval(function() {
       this.formatted = dateRepr(this.date)
-    }.bind(this), 600000)  // every 10 minutes
+    }.bind(this), 60000)  // every minute
   },
   destroyed: function() {
     clearInterval(this.interval)
