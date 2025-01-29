@@ -44,8 +44,33 @@ const app = createApp({
     api.feeds.list_errors().then(function(errors) {
       vm.feed_errors = errors
     })
+
+    this.interval = setInterval(function() {
+      if (this.loading.items || !vm.itemSortNewestFirst) {
+        return
+      }
+
+      var query = this.getItemsQuery()
+      if (vm.itemsLastId > 0) {
+        query.newer = vm.itemsLastId
+      }
+
+      this.loading.items = true
+      return api.items.list(query).then(function(data) {
+        if (data.list.length > 0) {
+          vm.items = data.list.concat(vm.items)
+          vm.itemsLastId = data.last_id
+        }
+        vm.loading.items = false
+        vm.refreshStats()
+      })
+    }.bind(this), 300000) // every 5 minutes
+
     this.updateMetaTheme(this.theme_name)
     this.$setLang(this.language)
+  },
+  destroyed: function() {
+    clearInterval(this.interval)
   },
   data: function() {
     var s = window.app.settings
@@ -59,6 +84,7 @@ const app = createApp({
       'feedNewChoiceSelected': '',
       'items': [],
       'itemsHasMore': true,
+      'itemsLastId': 0,
       'itemSelected': null,
       'itemSelectedDetails': null,
       'itemSelectedReadability': '',
@@ -205,6 +231,7 @@ const app = createApp({
       this.itemSelected = null
       this.items = []
       this.itemsHasMore = true
+      this.itemsLastId = 0
       api.settings.update({filter: newVal}).then(this.refreshItems.bind(this, false))
       this.computeStats()
     },
@@ -213,6 +240,7 @@ const app = createApp({
       this.itemSelected = null
       this.items = []
       this.itemsHasMore = true
+      this.itemsLastId = 0
       api.settings.update({feed: newVal}).then(this.refreshItems.bind(this, false))
       if (this.$refs.itemlist) this.$refs.itemlist.scrollTop = 0
     },
@@ -313,6 +341,7 @@ const app = createApp({
       if (this.feedSelected === null) {
         vm.items = []
         vm.itemsHasMore = false
+        vm.itemsLastId = 0
         return
       }
 
@@ -327,6 +356,7 @@ const app = createApp({
           vm.items = vm.items.concat(data.list)
         } else {
           vm.items = data.list
+          vm.itemsLastId = data.last_id
         }
         vm.itemsHasMore = data.has_more
         vm.loading.items = false
@@ -361,6 +391,7 @@ const app = createApp({
         vm.items = []
         vm.itemSelected = null
         vm.itemsHasMore = false
+        vm.itemsLastId = 0
         vm.refreshStats()
       })
     },

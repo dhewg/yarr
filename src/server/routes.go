@@ -391,15 +391,18 @@ func (s *Server) handleItemList(c *router.Context) {
 			items = items[:perPage]
 		}
 
+		var lastId int64 = 0
 		for i, item := range items {
 			if item.Title == "" {
 				text := htmlutil.ExtractText(item.Content)
 				items[i].Title = htmlutil.TruncateText(text, 140)
 			}
+			lastId = max(lastId, items[i].Id)
 		}
 		c.JSON(http.StatusOK, map[string]any{
 			"list":     items,
 			"has_more": hasMore,
+			"last_id":  lastId,
 		})
 	} else if c.Req.Method == "PUT" {
 		filter := storage.MarkFilter{}
