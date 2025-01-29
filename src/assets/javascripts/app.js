@@ -44,6 +44,39 @@ const app = createApp({
     api.feeds.list_errors().then(function(errors) {
       vm.feed_errors = errors
     })
+
+    this.interval = setInterval(function() {
+      if (this.loading.items) {
+        return
+      }
+
+      var query = this.getItemsQuery()
+      if (vm.items.length > 0) {
+        if (vm.itemSortNewestFirst) {
+          query.newer = vm.items[0].id
+        } else {
+          query.newer = vm.items[vm.items.length - 1].id
+        }
+      }
+
+      this.loading.items = true
+      return api.items.list(query).then(function(data) {
+        if (data.list.length > 0) {
+          if (vm.itemSortNewestFirst) {
+            vm.items = data.list.concat(vm.items)
+          } else {
+            vm.items = vm.items.concat(data.list)
+          }
+        }
+        vm.loading.items = false
+        if (data.list.length > 0) {
+          vm.refreshStats()
+        }
+      })
+    }.bind(this), 300000)  // every 5 minutes
+  },
+  destroyed: function() {
+    clearInterval(this.interval)
   },
   data: function() {
     var s = window.app.settings
