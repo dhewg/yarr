@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -501,25 +503,45 @@ func (s *Server) handleOPMLExport(c *router.Context) {
 	}
 }
 
-func (s *Server) handlePageCrawl(c *router.Context) {
-	url := c.Req.URL.Query().Get("url")
+var crap = regexp.MustCompile(`window.location.href="(.*)"`)
 
-	if newUrl := silo.RedirectURL(url); newUrl != "" {
-		url = newUrl
+func (s *Server) handlePageCrawl(c *router.Context) {
+	u := c.Req.URL.Query().Get("url")
+
+	if newUrl := silo.RedirectURL(u); newUrl != "" {
+		u = newUrl
 	}
-	if content := silo.VideoIFrame(url); content != "" {
+	if content := silo.VideoIFrame(u); content != "" {
 		c.JSON(http.StatusOK, map[string]string{
-			"content": sanitizer.Sanitize(url, content),
+			"content": sanitizer.Sanitize(u, content),
 		})
 		return
 	}
 
-	body, err := worker.GetBody(url)
+	body, err := worker.GetBody(u)
 	if err != nil {
 		log.Print(err)
 		c.Out.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	match := crap.FindStringSubmatch(body)
+	if len(match) == 2 {
+		log.Printf("[match]=%s", match[1])
+		if base, err := url.Parse(u); err == nil {
+			if href, err := url.Parse(match[1]); err == nil {
+				u = base.ResolveReference(href).String()
+				log.Printf("[url]=%s", u)
+				body, err = worker.GetBody(u)
+				if err != nil {
+					log.Print(err)
+					c.Out.WriteHeader(http.StatusBadRequest)
+					return
+				}
+			}
+		}
+	}
+
 	content, err := readability.ExtractContent(strings.NewReader(body))
 	if err != nil {
 		c.JSON(http.StatusOK, map[string]string{
@@ -527,7 +549,7 @@ func (s *Server) handlePageCrawl(c *router.Context) {
 		})
 		return
 	}
-	content = sanitizer.Sanitize(url, content)
+	content = sanitizer.Sanitize(u, content)
 	c.JSON(http.StatusOK, map[string]string{
 		"content": content,
 	})
