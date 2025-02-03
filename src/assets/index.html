@@ -309,7 +309,7 @@
             </div>
         </div>
         <!-- item show -->
-        <div id="col-item" class="vh-100 d-flex flex-column w-100" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" style="min-width: 0;">
+        <div id="col-item" ref="colitem" class="vh-100 d-flex flex-column w-100" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" style="min-width: 0;">
             <div class="toolbar px-2 d-flex align-items-center" v-if="itemSelectedDetails">
                 <button class="toolbar-item"
                         @click="toggleItemStarred(itemSelectedDetails)"
@@ -385,6 +385,25 @@
                     </div>
                     <div v-html="itemSelectedContent"></div>
                 <!--- </div> -->
+            </div>
+        </div>
+        <!-- mini player -->
+        <div class="miniplayer position-fixed" :style="{width: miniPlayerWidth+'px'}" v-if="miniPlayerMedia !== null">
+            <drag class="dragrtl" :width="miniPlayerWidth" :rtl="true" @resize="resizeMiniPlayer"></drag>
+            <div class="d-flex align-items-center"> <!-- // p-2 toolbar -->
+                <button class="toolbar-item bg-dark" @click="resizeMiniPlayer(this.$refs.colitem.clientWidth * 0.5)" title="50%">
+                    <span class="icon">{% inline "minimize-2.svg" %}</span>
+                </button>
+                <button class="toolbar-item bg-dark ml-2" @click="resizeMiniPlayer(this.$refs.colitem.clientWidth)" title="100%">
+                    <span class="icon">{% inline "maximize-2.svg" %}</span>
+                </button>
+                <div class="flex-grow-1"></div>
+                <button class="toolbar-item bg-dark" @click="miniPlayerMedia=null" title="Close Mini Player">
+                    <span class="icon">{% inline "x.svg" %}</span>
+                </button>
+            </div>
+                <div class="embed-responsive" :class="miniPlayerMedia.type == 'audio' ? 'embed-responsive-minimized' : 'embed-responsive-16by9'">
+                <iframe class="embed-responsive-item w-100 h-100" :src="miniPlayerMedia.url" allowfullscreen></iframe>
             </div>
         </div>
         <modal :open="!!settings" @hide="settings = ''">

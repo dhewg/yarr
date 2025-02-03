@@ -96,6 +96,9 @@ const app = createApp({
       'filteredFolderStats': {},
       'filteredTotalStats': null,
 
+      'miniPlayerWidth': null,
+      'miniPlayerMedia': null,
+
       'settings': '',
       'loading': {
         'feeds': 0,
@@ -562,6 +565,10 @@ const app = createApp({
         })
       }
     },
+    playMedia: function(media) {
+      this.resizeMiniPlayer(this.miniPlayerWidth ?? this.$refs.colitem.clientWidth * 0.5)
+      this.miniPlayerMedia = media
+    },
     showSettings: function(settings) {
       this.settings = settings
 
@@ -575,6 +582,9 @@ const app = createApp({
     },
     resizeItemList: function(width) {
       this.itemListWidth = Math.min(Math.max(200, width), 700)
+    },
+    resizeMiniPlayer: function(width) {
+      this.miniPlayerWidth = Math.min(Math.max(320, width), this.$refs.colitem.clientWidth)
     },
     resetFeedChoice: function() {
       this.feedNewChoice = []
@@ -719,15 +729,16 @@ app.directive('focus', {
 })
 
 app.component('drag', {
-  props: ['width'],
+  props: ['rtl', 'width'],
   template: '<div class="drag"></div>',
   mounted: function() {
     var self = this
+    var rtl = undefined
     var startX = undefined
     var initW = undefined
     var onMouseMove = function(e) {
       var offset = e.clientX - startX
-      var newWidth = initW + offset
+      var newWidth = rtl ? initW - offset : initW + offset
       self.$emit('resize', newWidth)
     }
     var onMouseUp = function(e) {
@@ -735,6 +746,7 @@ app.component('drag', {
       document.removeEventListener('mouseup', onMouseUp)
     }
     this.$el.addEventListener('mousedown', function(e) {
+      rtl = self.rtl || false
       startX = e.clientX
       initW = self.width
       document.addEventListener('mousemove', onMouseMove)

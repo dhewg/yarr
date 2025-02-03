@@ -321,6 +321,11 @@ select.form-control:not([multiple]):not([size]) {
   cursor: col-resize;
 }
 
+.dragrtl {
+  clear: right;
+  left: 0;
+}
+
 .input-icon {
   position: relative;
 }
@@ -441,6 +446,16 @@ select.form-control:not([multiple]):not([size]) {
 .content p {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.miniplayer {
+  right: 0rem;
+  bottom: 0rem;
+  z-index: 900;
+}
+
+.embed-responsive-minimized::before {
+  padding-top: 2.5rem;
 }
 
 /* theme: light */
