@@ -8,12 +8,11 @@ import (
 )
 
 var (
-	youtubeFrame = `<iframe src="https://www.youtube-nocookie.com/embed/%s" width="640" height="360" frameborder="0" allowfullscreen></iframe>`
-	vimeoFrame   = `<iframe src="https://player.vimeo.com/video/%s" width="640" height="360" frameborder="0" allowfullscreen></iframe>`
+	frame   = `<iframe src="%s" width="640" height="360" frameborder="0" allowfullscreen></iframe>`
 	vimeoRegex   = regexp.MustCompile(`\/(\d+)$`)
 )
 
-func VideoIFrame(link string) string {
+func VideoIFrameURL(link string) string {
 	l, err := url.Parse(link)
 	if err != nil {
 		return ""
@@ -26,13 +25,22 @@ func VideoIFrame(link string) string {
 		youtubeID = strings.TrimLeft(l.Path, "/")
 	}
 	if youtubeID != "" {
-		return fmt.Sprintf(youtubeFrame, youtubeID)
+		return "https://www.youtube-nocookie.com/embed/" + youtubeID
 	}
 
 	if l.Host == "vimeo.com" {
 		if matches := vimeoRegex.FindStringSubmatch(l.Path); len(matches) > 0 {
-			return fmt.Sprintf(vimeoFrame, matches[1])
+			return "https://player.vimeo.com/video/" + matches[1]
 		}
 	}
+	return ""
+}
+
+func VideoIFrame(link string) string {
+	l := VideoIFrameURL(link)
+	if l != "" {
+		return fmt.Sprintf(frame, l)
+	}
+
 	return ""
 }

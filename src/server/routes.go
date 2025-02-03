@@ -331,6 +331,7 @@ func (s *Server) handleItem(c *router.Context) {
 		}
 
 		item.Content = sanitizer.Sanitize(item.Link, item.Content)
+		item.MediaURL = silo.VideoIFrameURL(item.Link)
 
 		c.JSON(http.StatusOK, item)
 	} else if c.Req.Method == "PUT" {

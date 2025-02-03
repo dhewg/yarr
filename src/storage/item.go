@@ -55,6 +55,7 @@ type Item struct {
 	Status   ItemStatus `json:"status"`
 	ImageURL *string    `json:"image"`
 	AudioURL *string    `json:"podcast_url"`
+	MediaURL string     `json:"media_url"`
 }
 
 type ItemFilter struct {

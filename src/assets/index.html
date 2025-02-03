@@ -17,6 +17,19 @@
 </head>
 <body class="theme-{% .settings.theme_name %}">
     <div id="app" class="d-flex" v-cloak>
+        <!-- mini player -->
+        <div class="miniplayer position-fixed" :style="{width: miniPlayerWidth+'px'}" v-if="miniPlayerURL !== null">
+            <drag class="dragrtl" :width="miniPlayerWidth" :rtl="true" @resize="resizeMiniPlayer"></drag>
+            <div class="d-flex align-items-center"> <!-- // p-2 toolbar -->
+                <div class="flex-grow-1"></div>
+                <button class="toolbar-item" @click="miniPlayerURL=null" title="Close Mini Player">
+                    <span class="icon">{% inline "x.svg" %}</span>
+                </button>
+            </div>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe class="embed-responsive-item w-100 h-100" :src="miniPlayerURL" allowfullscreen></iframe>
+            </div>
+        </div>
         <!-- feed list -->
         <div id="col-feed-list" class="vh-100 position-relative d-flex flex-column border-right flex-shrink-0" :class="{'feed-selected': feedSelected !== null, 'item-selected': itemSelected !== null}" :style="{width: feedListWidth+'px'}">
             <drag :width="feedListWidth" @resize="resizeFeedList"></drag>

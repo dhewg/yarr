@@ -81,6 +81,8 @@ const app = createApp({
   data: function() {
     var s = window.app.settings
     return {
+      'miniPlayerURL': null,
+      'miniPlayerWidth': null,
       'filterSelected': s.filter,
       'folders': [],
       'feeds': [],
@@ -244,6 +246,10 @@ const app = createApp({
     },
   },
   methods: {
+    playMedia: function(url) {
+      this.miniPlayerWidth ??= Math.min(this.$refs.content.clientWidth, 640)
+      this.miniPlayerURL = url
+    },
     refreshStats: function(loopMode) {
       return api.status().then(function(data) {
         if (loopMode && !vm.itemSelected) vm.refreshItems()
@@ -507,6 +513,10 @@ const app = createApp({
       }
       var item = this.itemSelectedDetails
       if (!item) return
+      if (item.media_url) {
+        this.playMedia(item.media_url)
+        return
+      }
       if (item.link) {
         this.loading.readability = true
         api.crawl(item.link).then(function(data) {
@@ -522,6 +532,9 @@ const app = createApp({
         vm.feedNewChoice = []
         vm.feedNewChoiceSelected = ''
       }
+    },
+    resizeMiniPlayer: function(width) {
+      this.miniPlayerWidth = Math.min(Math.max(320, width), this.$refs.content.clientWidth)
     },
     resizeFeedList: function(width) {
       this.feedListWidth = Math.min(Math.max(200, width), 700)
@@ -640,15 +653,16 @@ app.directive('focus', {
 })
 
 app.component('drag', {
-  props: ['width'],
+  props: ['rtl', 'width'],
   template: '<div class="drag"></div>',
   mounted: function() {
     var self = this
+    var rtl = undefined
     var startX = undefined
     var initW = undefined
     var onMouseMove = function(e) {
       var offset = e.clientX - startX
-      var newWidth = initW + offset
+      var newWidth = rtl ? initW - offset : initW + offset
       self.$emit('resize', newWidth)
     }
     var onMouseUp = function(e) {
@@ -656,6 +670,7 @@ app.component('drag', {
       document.removeEventListener('mouseup', onMouseUp)
     }
     this.$el.addEventListener('mousedown', function(e) {
+      rtl = self.rtl || false
       startX = e.clientX
       initW = self.width
       document.addEventListener('mousemove', onMouseMove)
