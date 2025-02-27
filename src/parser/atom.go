@@ -104,7 +104,7 @@ func ParseAtom(r io.Reader) (*Feed, error) {
 		)
 		dstfeed.Items = append(dstfeed.Items, Item{
 			GUID:  firstNonEmpty(srcitem.ID, guidFromID, link),
-			Date:  dateParse(firstNonEmpty(srcitem.Published, srcitem.Updated)),
+			Date:  dateParse(firstNonEmpty(srcitem.Updated, srcitem.Published)),
 			URL:   link,
 			Title: srcitem.Title.Text(),
 			Content: firstNonEmpty(
