@@ -82,6 +82,11 @@ func ParseAtom(r io.Reader) (*Feed, error) {
 		SiteURL: firstNonEmpty(srcfeed.Links.First("alternate"), srcfeed.Links.First("")),
 	}
 	for _, srcitem := range srcfeed.Entries {
+		// cheap trick to skip "upcoming" videos
+		if !srcitem.hasMediaViews() {
+			continue
+		}
+
 		linkFromID := ""
 		guidFromID := ""
 		if htmlutil.IsAPossibleLink(srcitem.ID) {

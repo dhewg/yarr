@@ -15,6 +15,7 @@ type mediaGroup struct {
 	MediaContent      []mediaContent     `xml:"http://search.yahoo.com/mrss/ content"`
 	MediaThumbnails   []mediaThumbnail   `xml:"http://search.yahoo.com/mrss/ thumbnail"`
 	MediaDescriptions []mediaDescription `xml:"http://search.yahoo.com/mrss/ description"`
+	MediaCommunities  []mediaCommunity   `xml:"http://search.yahoo.com/mrss/ community"`
 }
 
 type mediaContent struct {
@@ -32,6 +33,14 @@ type mediaThumbnail struct {
 type mediaDescription struct {
 	Type string `xml:"type,attr"`
 	Text string `xml:",chardata"`
+}
+
+type mediaCommunity struct {
+	MediaStatistics []mediaStatistics `xml:"http://search.yahoo.com/mrss/ statistics"`
+}
+
+type mediaStatistics struct {
+	Views int64 `xml:"views,attr"`
 }
 
 func (m *media) firstMediaDescription() string {
@@ -94,4 +103,15 @@ func (m *media) mediaLinks() []MediaLink {
 		return nil
 	}
 	return links
+}
+
+func (m *media) hasMediaViews() bool {
+	for _, g := range m.MediaGroups {
+		for _, c := range g.MediaCommunities {
+			for _, s := range c.MediaStatistics {
+				return s.Views > 0
+			}
+		}
+	}
+	return true
 }
