@@ -25,7 +25,7 @@ func Authenticate(rw http.ResponseWriter, username, password, basepath string) {
 	http.SetCookie(rw, &http.Cookie{
 		Name:     "auth",
 		Value:    username + ":" + secret(username, password),
-		MaxAge:   604800, // 1 week
+		MaxAge:   604800 * 12, // 12 week
 		Path:     basepath,
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
