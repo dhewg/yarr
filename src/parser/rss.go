@@ -85,6 +85,10 @@ func ParseRSS(r io.Reader) (*Feed, error) {
 				mediaLinks = append(mediaLinks, MediaLink{URL: podcastURL, Type: "audio"})
 				break
 			}
+			if strings.HasPrefix(e.Type, "video/") {
+				mediaLinks = append(mediaLinks, MediaLink{URL: e.URL, Type: "video"})
+				break
+			}
 		}
 		for _, e := range srcitem.Enclosures {
 			if strings.HasPrefix(e.Type, "image/") {
