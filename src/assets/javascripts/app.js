@@ -189,13 +189,9 @@ const app = createApp({
       if (!this.itemSelectedDetails) return []
       return (this.itemSelectedDetails.media_links || []).filter(l => l.type === 'image')
     },
-    contentAudios: function() {
+    contentAV: function() {
       if (!this.itemSelectedDetails) return []
-      return (this.itemSelectedDetails.media_links || []).filter(l => l.type === 'audio')
-    },
-    contentVideos: function() {
-      if (!this.itemSelectedDetails) return []
-      return (this.itemSelectedDetails.media_links || []).filter(l => l.type === 'video')
+      return (this.itemSelectedDetails.media_links || []).filter(l => l.type !== 'image')
     },
     refreshRateTitle: function () {
       const entry = this.refreshRateOptions.find(o => o.value === this.refreshRate)

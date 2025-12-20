@@ -380,9 +380,11 @@
                                 <figcaption v-if="media.description">{{ media.description }}</figcaption>
                             </figure>
                         </div>
-                        <audio class="w-100" controls v-for="media in contentAudios" :src="media.url"></audio>
-                        <video class="w-100" controls v-for="media in contentVideos" :src="media.url"></video>
+                        <div v-for="media in contentAV">
+                            <media-player :media="media"/>
+                        </div>
                     </div>
+                    <hr v-if="itemSelectedDetails.media_links.length">
                     <div v-html="itemSelectedContent"></div>
                 <!--- </div> -->
             </div>
