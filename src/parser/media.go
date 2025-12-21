@@ -12,7 +12,8 @@ type media struct {
 }
 
 type mediaGroup struct {
-	MediaContent      []mediaContent     `xml:"http://search.yahoo.com/mrss/ content"`
+	MediaTitle        string             `xml:"http://search.yahoo.com/mrss/ title"`
+	MediaContents     []mediaContent     `xml:"http://search.yahoo.com/mrss/ content"`
 	MediaThumbnails   []mediaThumbnail   `xml:"http://search.yahoo.com/mrss/ thumbnail"`
 	MediaDescriptions []mediaDescription `xml:"http://search.yahoo.com/mrss/ description"`
 	MediaCommunities  []mediaCommunity   `xml:"http://search.yahoo.com/mrss/ community"`
@@ -66,6 +67,34 @@ func (m *media) mediaLinks() []MediaLink {
 				URL:  thumbnail.URL,
 				Type: "image",
 			})
+		}
+		for _, content := range group.MediaContents {
+			if content.MediaURL != "" {
+				url := content.MediaURL
+				description := firstNonEmpty(content.MediaDescription.Text, group.MediaTitle)
+				if strings.HasPrefix(content.MediaType, "image/") {
+					links = append(links, MediaLink{URL: url, Type: "image", Description: description})
+				} else if strings.HasPrefix(content.MediaType, "audio/") {
+					links = append(links, MediaLink{URL: url, Type: "audio", Description: description})
+				} else if strings.HasPrefix(content.MediaType, "video/") || content.MediaType == "application/x-shockwave-flash" {
+					links = append(links, MediaLink{URL: url, Type: "video", Description: description})
+				} else if content.MediaMedium == "image" || content.MediaMedium == "audio" || content.MediaMedium == "video" {
+					links = append(links, MediaLink{URL: url, Type: content.MediaMedium, Description: description})
+				} else {
+					if len(content.MediaThumbnails) > 0 {
+						links = append(links, MediaLink{
+							URL:  content.MediaThumbnails[0].URL,
+							Type: "image",
+						})
+					}
+				}
+			}
+			for _, thumbnail := range content.MediaThumbnails {
+				links = append(links, MediaLink{
+					URL:  thumbnail.URL,
+					Type: "image",
+				})
+			}
 		}
 	}
 	for _, content := range m.MediaContents {
