@@ -76,7 +76,7 @@ func (m *media) mediaLinks() []MediaLink {
 				links = append(links, MediaLink{URL: url, Type: "image", Description: description})
 			} else if strings.HasPrefix(content.MediaType, "audio/") {
 				links = append(links, MediaLink{URL: url, Type: "audio", Description: description})
-			} else if strings.HasPrefix(content.MediaType, "video/") {
+			} else if strings.HasPrefix(content.MediaType, "video/") || content.MediaType == "application/x-shockwave-flash" {
 				links = append(links, MediaLink{URL: url, Type: "video", Description: description})
 			} else if content.MediaMedium == "image" || content.MediaMedium == "audio" || content.MediaMedium == "video" {
 				links = append(
