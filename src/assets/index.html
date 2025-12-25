@@ -385,7 +385,7 @@
                         </div>
                     </div>
                     <hr v-if="itemSelectedDetails.media_links.length">
-                    <div v-html="itemSelectedContent"></div>
+                    <component :is="{ template: `${itemSelectedContent}` }" />
                 <!--- </div> -->
             </div>
         </div>

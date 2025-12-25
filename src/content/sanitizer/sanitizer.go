@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/nkanaev/yarr/src/content/htmlutil"
+	"github.com/nkanaev/yarr/src/content/silo"
 	"golang.org/x/net/html"
 )
 
@@ -59,9 +60,9 @@ func Sanitize(baseURL, input string) string {
 				attrNames, htmlAttributes := sanitizeAttributes(baseURL, tagName, token.Attr)
 
 				if hasRequiredAttributes(tagName, attrNames) {
-					wrap := isVideoIframe(token)
-					if wrap {
-						buffer.WriteString(`<div class="video-wrapper">`)
+					if res, src := isVideoIframe(token); res {
+						buffer.WriteString(`<media-player :media="{url:'` + src + `', type:'video'}"/>`)
+						continue
 					}
 
 					if len(attrNames) > 0 {
@@ -73,9 +74,6 @@ func Sanitize(baseURL, input string) string {
 					if tagName == "iframe" {
 						// autoclose iframes
 						buffer.WriteString("</iframe>")
-						if wrap {
-							buffer.WriteString("</div>")
-						}
 					} else {
 						tagStack = append(tagStack, tagName)
 					}
@@ -431,21 +429,23 @@ func isValidDataAttribute(value string) bool {
 	return false
 }
 
-func isVideoIframe(token html.Token) bool {
+func isVideoIframe(token html.Token) (bool, string) {
 	videoWhitelist := map[string]bool{
 		"player.bilibili.com":      true,
 		"player.vimeo.com":         true,
 		"www.dailymotion.com":      true,
-		"www.youtube-nocookie.com": true,
-		"www.youtube.com":          true,
 	}
 	if token.Data == "iframe" {
 		for _, attr := range token.Attr {
 			if attr.Key == "src" {
 				domain := htmlutil.URLDomain(attr.Val)
-				return videoWhitelist[domain]
+				url := silo.VideoIFrameURL(attr.Val)
+				if url != "" {
+					return true, url
+				}
+				return videoWhitelist[domain], attr.Val
 			}
 		}
 	}
-	return false
+	return false, ""
 }
