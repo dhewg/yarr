@@ -885,5 +885,20 @@ app.component('relative-time', {
   },
 })
 
+app.component('media-player', {
+  props: ['media'],
+  data: function() {
+    return {
+      'audio': this.media.type === 'audio',
+      'icon_audio': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-music"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>',
+      'icon_video': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-youtube"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>',
+    }
+  },
+  template: `<button class="btn btn-link" :title="$props.media.url" @click="$root.playMedia($props.media)">
+               <div class="icon mr-2" v-html="audio ? icon_audio : icon_video"></div>
+               <b>{{ $props.media.description || (audio ? "Play Audio" : "Play Video") }}</b>
+             </button>`,
+})
+
 app.use(i18n)
 const vm = app.mount('#app')
