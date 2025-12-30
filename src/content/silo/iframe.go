@@ -26,6 +26,8 @@ func VideoIFrame(link string) string {
 		youtubeID = strings.TrimPrefix(l.Path, "/v/")
 	} else if l.Host == "www.youtube.com" && strings.HasPrefix(l.Path, "/shorts/") {
 		youtubeID = strings.TrimPrefix(l.Path, "/shorts/")
+	} else if l.Host == "www.youtube.com" && strings.HasPrefix(l.Path, "/embed/") {
+		youtubeID = strings.TrimPrefix(l.Path, "/embed/")
 	} else if l.Host == "youtu.be" {
 		youtubeID = strings.TrimLeft(l.Path, "/")
 	}
