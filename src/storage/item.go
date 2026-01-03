@@ -50,6 +50,7 @@ type MediaLink struct {
 	URL         string `json:"url"`
 	Type        string `json:"type"`
 	Description string `json:"description,omitempty"`
+	Thumbnail   string `json:"thumbnail,omitempty"`
 }
 
 type MediaLinks []MediaLink

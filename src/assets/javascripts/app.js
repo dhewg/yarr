@@ -891,6 +891,7 @@ app.component('media-player', {
     }
   },
   template: `<button class="btn btn-link" :title="$props.media.url" @click="$root.playMedia($props.media)">
+               <figure v-if="media.thumbnail"><img :src="media.thumbnail" loading="lazy"></figure>
                <div class="icon mr-2" v-html="audio ? icon_audio : icon_video"></div>
                <b>{{ $props.media.description || (audio ? "Play Audio" : "Play Video") }}</b>
              </button>`,

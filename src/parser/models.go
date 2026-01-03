@@ -22,4 +22,5 @@ type MediaLink struct {
 	URL         string
 	Type        string
 	Description string
+	Thumbnail   string
 }

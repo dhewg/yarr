@@ -44,6 +44,16 @@ type mediaStatistics struct {
 	Views int64 `xml:"views,attr"`
 }
 
+func firstMediaThumbnail(vals ...[]mediaThumbnail) string {
+	for _, val := range vals {
+		if len(val) > 0 {
+			return val[0].URL
+		}
+	}
+
+	return ""
+}
+
 func (m *media) firstMediaDescription() string {
 	for _, d := range m.MediaDescriptions {
 		return plain2html(d.Text)
@@ -62,38 +72,28 @@ func (m *media) mediaLinks() []MediaLink {
 		links = append(links, MediaLink{URL: thumbnail.URL, Type: "image"})
 	}
 	for _, group := range m.MediaGroups {
-		for _, thumbnail := range group.MediaThumbnails {
-			links = append(links, MediaLink{
-				URL:  thumbnail.URL,
-				Type: "image",
-			})
-		}
 		for _, content := range group.MediaContents {
 			if content.MediaURL != "" {
 				url := content.MediaURL
 				description := firstNonEmpty(content.MediaDescription.Text, group.MediaTitle)
+				thumbnail := firstMediaThumbnail(content.MediaThumbnails, group.MediaThumbnails, m.MediaThumbnails)
+
 				if strings.HasPrefix(content.MediaType, "image/") {
-					links = append(links, MediaLink{URL: url, Type: "image", Description: description})
+					links = append(links, MediaLink{URL: url, Type: "image", Description: description, Thumbnail: thumbnail})
 				} else if strings.HasPrefix(content.MediaType, "audio/") {
 					links = append(links, MediaLink{URL: url, Type: "audio", Description: description})
 				} else if strings.HasPrefix(content.MediaType, "video/") || content.MediaType == "application/x-shockwave-flash" {
-					links = append(links, MediaLink{URL: url, Type: "video", Description: description})
+					links = append(links, MediaLink{URL: url, Type: "video", Description: description, Thumbnail: thumbnail})
 				} else if content.MediaMedium == "image" || content.MediaMedium == "audio" || content.MediaMedium == "video" {
-					links = append(links, MediaLink{URL: url, Type: content.MediaMedium, Description: description})
+					links = append(links, MediaLink{URL: url, Type: content.MediaMedium, Description: description, Thumbnail: thumbnail})
 				} else {
-					if len(content.MediaThumbnails) > 0 {
+					if thumbnail != "" {
 						links = append(links, MediaLink{
-							URL:  content.MediaThumbnails[0].URL,
+							URL:  thumbnail,
 							Type: "image",
 						})
 					}
 				}
-			}
-			for _, thumbnail := range content.MediaThumbnails {
-				links = append(links, MediaLink{
-					URL:  thumbnail.URL,
-					Type: "image",
-				})
 			}
 		}
 	}
@@ -101,31 +101,24 @@ func (m *media) mediaLinks() []MediaLink {
 		if content.MediaURL != "" {
 			url := content.MediaURL
 			description := content.MediaDescription.Text
+			thumbnail := firstMediaThumbnail(content.MediaThumbnails, m.MediaThumbnails)
+
 			if strings.HasPrefix(content.MediaType, "image/") {
-				links = append(links, MediaLink{URL: url, Type: "image", Description: description})
+				links = append(links, MediaLink{URL: url, Type: "image", Description: description, Thumbnail: thumbnail})
 			} else if strings.HasPrefix(content.MediaType, "audio/") {
-				links = append(links, MediaLink{URL: url, Type: "audio", Description: description})
+				links = append(links, MediaLink{URL: url, Type: "audio", Description: description, Thumbnail: thumbnail})
 			} else if strings.HasPrefix(content.MediaType, "video/") || content.MediaType == "application/x-shockwave-flash" {
-				links = append(links, MediaLink{URL: url, Type: "video", Description: description})
+				links = append(links, MediaLink{URL: url, Type: "video", Description: description, Thumbnail: thumbnail})
 			} else if content.MediaMedium == "image" || content.MediaMedium == "audio" || content.MediaMedium == "video" {
-				links = append(
-					links,
-					MediaLink{URL: url, Type: content.MediaMedium, Description: description},
-				)
+				links = append(links, MediaLink{URL: url, Type: content.MediaMedium, Description: description, Thumbnail: thumbnail})
 			} else {
-				if len(content.MediaThumbnails) > 0 {
+				if thumbnail != "" {
 					links = append(links, MediaLink{
-						URL:  content.MediaThumbnails[0].URL,
+						URL:  thumbnail,
 						Type: "image",
 					})
 				}
 			}
-		}
-		for _, thumbnail := range content.MediaThumbnails {
-			links = append(links, MediaLink{
-				URL:  thumbnail.URL,
-				Type: "image",
-			})
 		}
 	}
 	if len(links) == 0 {
