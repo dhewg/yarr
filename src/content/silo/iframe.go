@@ -18,23 +18,26 @@ func VideoIFrameURL(link string) (string, string) {
 		return "", ""
 	}
 
+	host := strings.TrimPrefix(l.Host, "www.")
 	youtubeID := ""
-	if l.Host == "www.youtube.com" && l.Path == "/watch" {
-		youtubeID = l.Query().Get("v")
-	} else if l.Host == "www.youtube.com" && strings.HasPrefix(l.Path, "/v/") {
-		youtubeID = strings.TrimPrefix(l.Path, "/v/")
-	} else if l.Host == "www.youtube.com" && strings.HasPrefix(l.Path, "/shorts/") {
-		youtubeID = strings.TrimPrefix(l.Path, "/shorts/")
-	} else if l.Host == "www.youtube.com" && strings.HasPrefix(l.Path, "/embed/") {
-		youtubeID = strings.TrimPrefix(l.Path, "/embed/")
-	} else if l.Host == "youtu.be" {
+	if host == "youtube.com" || host == "youtube-nocookie.com"{
+		if l.Path == "/watch" {
+			youtubeID = l.Query().Get("v")
+		} else if strings.HasPrefix(l.Path, "/v/") {
+			youtubeID = strings.TrimPrefix(l.Path, "/v/")
+		} else if strings.HasPrefix(l.Path, "/shorts/") {
+			youtubeID = strings.TrimPrefix(l.Path, "/shorts/")
+		} else if strings.HasPrefix(l.Path, "/embed/") {
+			youtubeID = strings.TrimPrefix(l.Path, "/embed/")
+		}
+	} else if host == "youtu.be" {
 		youtubeID = strings.TrimLeft(l.Path, "/")
 	}
 	if youtubeID != "" {
 		return "https://www.youtube-nocookie.com/embed/" + youtubeID, "https://img.youtube.com/vi/" + youtubeID + "/hqdefault.jpg"
 	}
 
-	if l.Host == "vimeo.com" {
+	if host == "vimeo.com" {
 		if matches := vimeoRegex.FindStringSubmatch(l.Path); len(matches) > 0 {
 			return "https://player.vimeo.com/video/" + matches[1], ""
 		}
