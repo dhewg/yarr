@@ -285,66 +285,6 @@ func isValidIframeSource(baseURL, src string) bool {
 	return slices.Contains(whitelist, domain)
 }
 
-func getTagAllowList() map[string][]string {
-	whitelist := make(map[string][]string)
-	whitelist["img"] = []string{"alt", "title", "src", "srcset", "sizes"}
-	whitelist["picture"] = []string{}
-	whitelist["audio"] = []string{"src"}
-	whitelist["video"] = []string{"poster", "height", "width", "src"}
-	whitelist["source"] = []string{"src", "type", "srcset", "sizes", "media"}
-	whitelist["dt"] = []string{}
-	whitelist["dd"] = []string{}
-	whitelist["dl"] = []string{}
-	whitelist["table"] = []string{}
-	whitelist["caption"] = []string{}
-	whitelist["thead"] = []string{}
-	whitelist["tfooter"] = []string{}
-	whitelist["tr"] = []string{}
-	whitelist["td"] = []string{"rowspan", "colspan"}
-	whitelist["th"] = []string{"rowspan", "colspan"}
-	whitelist["h1"] = []string{}
-	whitelist["h2"] = []string{}
-	whitelist["h3"] = []string{}
-	whitelist["h4"] = []string{}
-	whitelist["h5"] = []string{}
-	whitelist["h6"] = []string{}
-	whitelist["strong"] = []string{}
-	whitelist["em"] = []string{}
-	whitelist["code"] = []string{}
-	whitelist["pre"] = []string{}
-	whitelist["blockquote"] = []string{}
-	whitelist["q"] = []string{"cite"}
-	whitelist["p"] = []string{}
-	whitelist["ul"] = []string{}
-	whitelist["li"] = []string{}
-	whitelist["ol"] = []string{}
-	whitelist["br"] = []string{}
-	whitelist["del"] = []string{}
-	whitelist["a"] = []string{"href", "title"}
-	whitelist["figure"] = []string{}
-	whitelist["figcaption"] = []string{}
-	whitelist["cite"] = []string{}
-	whitelist["time"] = []string{"datetime"}
-	whitelist["abbr"] = []string{"title"}
-	whitelist["acronym"] = []string{"title"}
-	whitelist["wbr"] = []string{}
-	whitelist["dfn"] = []string{}
-	whitelist["sub"] = []string{}
-	whitelist["sup"] = []string{}
-	whitelist["var"] = []string{}
-	whitelist["samp"] = []string{}
-	whitelist["s"] = []string{}
-	whitelist["del"] = []string{}
-	whitelist["ins"] = []string{}
-	whitelist["kbd"] = []string{}
-	whitelist["rp"] = []string{}
-	whitelist["rt"] = []string{}
-	whitelist["rtc"] = []string{}
-	whitelist["ruby"] = []string{}
-	whitelist["iframe"] = []string{"width", "height", "frameborder", "src", "allowfullscreen"}
-	return whitelist
-}
-
 func inList(needle string, haystack []string) bool {
 	return slices.Contains(haystack, needle)
 }
