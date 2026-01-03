@@ -12,10 +12,10 @@ var (
 	vimeoRegex   = regexp.MustCompile(`\/(\d+)$`)
 )
 
-func VideoIFrameURL(link string) string {
+func VideoIFrameURL(link string) (string, string) {
 	l, err := url.Parse(link)
 	if err != nil {
-		return ""
+		return "", ""
 	}
 
 	youtubeID := ""
@@ -31,19 +31,19 @@ func VideoIFrameURL(link string) string {
 		youtubeID = strings.TrimLeft(l.Path, "/")
 	}
 	if youtubeID != "" {
-		return "https://www.youtube-nocookie.com/embed/" + youtubeID
+		return "https://www.youtube-nocookie.com/embed/" + youtubeID, "https://img.youtube.com/vi/" + youtubeID + "/hqdefault.jpg"
 	}
 
 	if l.Host == "vimeo.com" {
 		if matches := vimeoRegex.FindStringSubmatch(l.Path); len(matches) > 0 {
-			return "https://player.vimeo.com/video/" + matches[1]
+			return "https://player.vimeo.com/video/" + matches[1], ""
 		}
 	}
-	return ""
+	return "", ""
 }
 
 func VideoIFrame(link string) string {
-	if l := VideoIFrameURL(link); l != "" {
+	if l, _ := VideoIFrameURL(link); l != "" {
 		return fmt.Sprintf(frame, l)
 	}
 

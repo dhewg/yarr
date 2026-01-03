@@ -60,8 +60,8 @@ func Sanitize(baseURL, input string) string {
 				attrNames, htmlAttributes := sanitizeAttributes(baseURL, tagName, token.Attr)
 
 				if hasRequiredAttributes(tagName, attrNames) {
-					if res, src := isVideoIframe(token); res {
-						buffer.WriteString(`<media-player :media="{url:'` + src + `', type:'video'}"/>`)
+					if res, src, thumbnail := isVideoIframe(token); res {
+						buffer.WriteString(`<media-player :media="{url:'` + src + `', thumbnail:'` + thumbnail + `', type:'video'}"/>`)
 						continue
 					}
 
@@ -369,7 +369,7 @@ func isValidDataAttribute(value string) bool {
 	return false
 }
 
-func isVideoIframe(token html.Token) (bool, string) {
+func isVideoIframe(token html.Token) (bool, string, string) {
 	videoWhitelist := map[string]bool{
 		"player.bilibili.com":      true,
 		"player.vimeo.com":         true,
@@ -379,13 +379,13 @@ func isVideoIframe(token html.Token) (bool, string) {
 		for _, attr := range token.Attr {
 			if attr.Key == "src" {
 				domain := htmlutil.URLDomain(attr.Val)
-				url := silo.VideoIFrameURL(attr.Val)
+				url, thumbnail := silo.VideoIFrameURL(attr.Val)
 				if url != "" {
-					return true, url
+					return true, url, thumbnail
 				}
-				return videoWhitelist[domain], attr.Val
+				return videoWhitelist[domain], attr.Val, ""
 			}
 		}
 	}
-	return false, ""
+	return false, "", ""
 }
