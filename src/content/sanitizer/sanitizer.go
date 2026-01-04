@@ -22,16 +22,31 @@ var splitSrcsetRegex = regexp.MustCompile(`,\s+`)
 
 // Sanitize returns safe HTML.
 func Sanitize(baseURL, input string) string {
+	// https://html.spec.whatwg.org/multipage/syntax.html#void-elements
+	voidElements := map[string]bool{
+		"area":   true,
+		"base":   true,
+		"br":     true,
+		"col":    true,
+		"embed":  true,
+		"hr":     true,
+		"img":    true,
+		"input":  true,
+		"source": true,
+		"track":  true,
+		"wbr":    true,
+	}
 	var buffer bytes.Buffer
-	var tagStack []string
-	var parentTag string
-	blacklistedTagDepth := 0
+	var tagStack, blacklistStack []string
 
 	tokenizer := html.NewTokenizer(bytes.NewBufferString(input))
 	for {
 		if tokenizer.Next() == html.ErrorToken {
 			err := tokenizer.Err()
 			if err == io.EOF {
+				if len(tagStack) > 0 {
+					fmt.Printf("Malformed HTML at URL '%s', the tag stack has %d elements left: %s\n", baseURL, len(tagStack), tagStack)
+				}
 				return buffer.String()
 			}
 
@@ -41,20 +56,19 @@ func Sanitize(baseURL, input string) string {
 		token := tokenizer.Token()
 		switch token.Type {
 		case html.TextToken:
-			if blacklistedTagDepth > 0 {
+			if len(blacklistStack) > 0 {
 				continue
 			}
 
 			// An iframe element never has fallback content.
 			// See https://www.w3.org/TR/2010/WD-html5-20101019/the-iframe-element.html#the-iframe-element
-			if parentTag == "iframe" {
+			if match, _ := popStack("iframe", tagStack); match {
 				continue
 			}
 
 			buffer.WriteString(html.EscapeString(token.Data))
 		case html.StartTagToken:
 			tagName := token.Data
-			parentTag = tagName
 
 			if isValidTag(tagName) {
 				attrNames, htmlAttributes := sanitizeAttributes(baseURL, tagName, token.Attr)
@@ -74,12 +88,12 @@ func Sanitize(baseURL, input string) string {
 					if tagName == "iframe" {
 						// autoclose iframes
 						buffer.WriteString("</iframe>")
-					} else {
+					} else if !voidElements[tagName] {
 						tagStack = append(tagStack, tagName)
 					}
 				}
 			} else if isBlockedTag(tagName) {
-				blacklistedTagDepth++
+				blacklistStack = append(blacklistStack, tagName)
 			}
 		case html.EndTagToken:
 			tagName := token.Data
@@ -89,8 +103,9 @@ func Sanitize(baseURL, input string) string {
 			}
 			if isValidTag(tagName) && inList(tagName, tagStack) {
 				buffer.WriteString(fmt.Sprintf("</%s>", tagName))
+				_, tagStack = popStack(tagName, tagStack)
 			} else if isBlockedTag(tagName) {
-				blacklistedTagDepth--
+				_, blacklistStack = popStack(tagName, blacklistStack)
 			}
 		case html.SelfClosingTagToken:
 			tagName := token.Data
@@ -283,6 +298,15 @@ func isValidIframeSource(baseURL, src string) bool {
 	}
 
 	return slices.Contains(whitelist, domain)
+}
+
+func popStack(name string, stack []string) (bool, []string) {
+	l := len(stack)
+	if l < 1 || stack[l - 1] != name {
+		return false, stack
+	}
+
+	return true, stack[:l - 1]
 }
 
 func inList(needle string, haystack []string) bool {
