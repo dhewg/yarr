@@ -294,6 +294,7 @@ func isBlockedTag(tagName string) bool {
 		"noscript",
 		"script",
 		"style",
+		"head",
 	}
 
 	return slices.Contains(blacklist, tagName)
