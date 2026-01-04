@@ -38,6 +38,7 @@ func Sanitize(baseURL, input string) string {
 	}
 	var buffer bytes.Buffer
 	var tagStack, blacklistStack []string
+	var inSvg bool = false
 
 	tokenizer := html.NewTokenizer(bytes.NewBufferString(input))
 	for {
@@ -69,9 +70,12 @@ func Sanitize(baseURL, input string) string {
 			buffer.WriteString(html.EscapeString(token.Data))
 		case html.StartTagToken:
 			tagName := token.Data
+			if tagName == "svg" {
+				inSvg = true
+			}
 
-			if isValidTag(tagName) {
-				attrNames, htmlAttributes := sanitizeAttributes(baseURL, tagName, token.Attr)
+			if isValidTag(inSvg, tagName) {
+				attrNames, htmlAttributes := sanitizeAttributes(baseURL, inSvg, tagName, token.Attr)
 
 				if hasRequiredAttributes(tagName, attrNames) {
 					if res, src, thumbnail := isVideoIframe(token); res {
@@ -101,16 +105,20 @@ func Sanitize(baseURL, input string) string {
 			if tagName == "iframe" {
 				continue
 			}
-			if isValidTag(tagName) && inList(tagName, tagStack) {
+			if isValidTag(inSvg, tagName) && inList(tagName, tagStack) {
 				buffer.WriteString(fmt.Sprintf("</%s>", tagName))
 				_, tagStack = popStack(tagName, tagStack)
+				if tagName == "svg" {
+					inSvg = false
+				}
 			} else if isBlockedTag(tagName) {
 				_, blacklistStack = popStack(tagName, blacklistStack)
 			}
 		case html.SelfClosingTagToken:
 			tagName := token.Data
-			if isValidTag(tagName) {
-				attrNames, htmlAttributes := sanitizeAttributes(baseURL, tagName, token.Attr)
+			svg := inSvg || tagName == "svg"
+			if isValidTag(svg, tagName) {
+				attrNames, htmlAttributes := sanitizeAttributes(baseURL, svg, tagName, token.Attr)
 
 				if hasRequiredAttributes(tagName, attrNames) {
 					if len(attrNames) > 0 {
@@ -124,13 +132,13 @@ func Sanitize(baseURL, input string) string {
 	}
 }
 
-func sanitizeAttributes(baseURL, tagName string, attributes []html.Attribute) ([]string, string) {
+func sanitizeAttributes(baseURL string, svg bool, tagName string, attributes []html.Attribute) ([]string, string) {
 	var htmlAttrs, attrNames []string
 
 	for _, attribute := range attributes {
 		value := attribute.Val
 
-		if !isValidAttribute(tagName, attribute.Key) {
+		if !isValidAttribute(svg, tagName, attribute.Key) {
 			continue
 		}
 
@@ -204,18 +212,26 @@ func getExtraAttributes(tagName string) ([]string, []string) {
 	}
 }
 
-func isValidTag(tagName string) bool {
-	x := allowedTags.has(tagName) || allowedSvgTags.has(tagName) || allowedSvgFilters.has(tagName)
+func isValidTag(svg bool, tagName string) bool {
+	var x bool
+	if svg {
+		x = allowedSvgTags.has(tagName) || allowedSvgFilters.has(tagName)
+	} else {
+		x = allowedTags.has(tagName)
+	}
 	//fmt.Println(tagName, x)
 	return x
 }
 
-func isValidAttribute(tagName, attributeName string) bool {
-	if attrs, ok := allowedAttrs[tagName]; ok {
-		return attrs.has(attributeName)
-	}
-	if allowedSvgTags.has(tagName) {
-		return allowedSvgAttrs.has(attributeName)
+func isValidAttribute(svg bool, tagName, attributeName string) bool {
+	if svg {
+		if allowedSvgTags.has(tagName) {
+			return allowedSvgAttrs.has(attributeName)
+		}
+	} else {
+		if attrs, ok := allowedAttrs[tagName]; ok {
+			return attrs.has(attributeName)
+		}
 	}
 	return false
 }
