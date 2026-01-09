@@ -42,6 +42,17 @@ func VideoIFrameURL(link string) (string, string) {
 			return "https://player.vimeo.com/video/" + matches[1], ""
 		}
 	}
+
+	if host == "bitchute.com" || host == "old.bitchute.com" {
+		if id, found = strings.CutPrefix(l.Path, "/video/"); found {
+		} else if id, found = strings.CutPrefix(l.Path, "/torrent/"); found {
+		} else if id, found = strings.CutPrefix(l.Path, "/embed/"); found {
+		}
+		if found {
+			return "https://www.bitchute.com/embed/" + id, ""
+		}
+	}
+
 	return "", ""
 }
 
