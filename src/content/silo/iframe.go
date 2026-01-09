@@ -19,22 +19,22 @@ func VideoIFrameURL(link string) (string, string) {
 	}
 
 	host := strings.TrimPrefix(l.Host, "www.")
-	youtubeID := ""
+	id := ""
+	found := false
 	if host == "youtube.com" || host == "youtube-nocookie.com"{
 		if l.Path == "/watch" {
-			youtubeID = l.Query().Get("v")
-		} else if strings.HasPrefix(l.Path, "/v/") {
-			youtubeID = strings.TrimPrefix(l.Path, "/v/")
-		} else if strings.HasPrefix(l.Path, "/shorts/") {
-			youtubeID = strings.TrimPrefix(l.Path, "/shorts/")
-		} else if strings.HasPrefix(l.Path, "/embed/") {
-			youtubeID = strings.TrimPrefix(l.Path, "/embed/")
+			id = l.Query().Get("v")
+			found = true
+		} else if id, found = strings.CutPrefix(l.Path, "/v/"); found {
+		} else if id, found = strings.CutPrefix(l.Path, "/shorts/"); found {
+		} else if id, found = strings.CutPrefix(l.Path, "/embed/"); found {
 		}
 	} else if host == "youtu.be" {
-		youtubeID = strings.TrimLeft(l.Path, "/")
+		id = strings.TrimLeft(l.Path, "/")
+		found = true
 	}
-	if youtubeID != "" {
-		return "https://www.youtube-nocookie.com/embed/" + youtubeID, "https://img.youtube.com/vi/" + youtubeID + "/hqdefault.jpg"
+	if found {
+		return "https://www.youtube-nocookie.com/embed/" + id, "https://img.youtube.com/vi/" + id + "/hqdefault.jpg"
 	}
 
 	if host == "vimeo.com" {
