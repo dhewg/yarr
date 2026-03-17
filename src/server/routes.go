@@ -337,7 +337,7 @@ func (s *Server) handleItem(c *router.Context) {
 
 		item.Content = sanitizer.Sanitize(item.Link, item.Content)
 		for i := range item.MediaLinks {
-			if iframeurl, _ := silo.VideoIFrameURL(item.MediaLinks[i].URL); iframeurl != "" {
+			if iframeurl, _ := silo.VideoIFrameURL(item.MediaLinks[i].URL, true); iframeurl != "" {
 				item.MediaLinks[i].URL = iframeurl
 			}
 		}

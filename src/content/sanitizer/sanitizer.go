@@ -83,6 +83,10 @@ func Sanitize(baseURL, input string) string {
 						continue
 					}
 
+					if res, src, thumbnail := isVideoA(token); res {
+						buffer.WriteString(`<media-player :media="{url:'` + src + `', thumbnail:'` + thumbnail + `', type:'video'}"/>`)
+					}
+
 					if len(attrNames) > 0 {
 						buffer.WriteString("<" + tagName + " " + htmlAttributes + ">")
 					} else {
@@ -412,17 +416,17 @@ func isValidDataAttribute(value string) bool {
 	return false
 }
 
-func isVideoIframe(token html.Token) (bool, string, string) {
+func isVideoToken(token html.Token, data string, key string, hqthumbnail bool) (bool, string, string) {
 	videoWhitelist := map[string]bool{
 		"player.bilibili.com":      true,
 		"player.vimeo.com":         true,
 		"www.dailymotion.com":      true,
 	}
-	if token.Data == "iframe" {
+	if token.Data == data {
 		for _, attr := range token.Attr {
-			if attr.Key == "src" {
+			if attr.Key == key {
 				domain := htmlutil.URLDomain(attr.Val)
-				url, thumbnail := silo.VideoIFrameURL(attr.Val)
+				url, thumbnail := silo.VideoIFrameURL(attr.Val, hqthumbnail)
 				if url != "" {
 					return true, url, thumbnail
 				}
@@ -431,4 +435,12 @@ func isVideoIframe(token html.Token) (bool, string, string) {
 		}
 	}
 	return false, "", ""
+}
+
+func isVideoIframe(token html.Token) (bool, string, string) {
+	return isVideoToken(token, "iframe", "src", true)
+}
+
+func isVideoA(token html.Token) (bool, string, string) {
+	return isVideoToken(token, "a", "href", false)
 }
