@@ -28,6 +28,7 @@ func VideoIFrameURL(link string) (string, string) {
 		} else if id, found = strings.CutPrefix(l.Path, "/v/"); found {
 		} else if id, found = strings.CutPrefix(l.Path, "/shorts/"); found {
 		} else if id, found = strings.CutPrefix(l.Path, "/embed/"); found {
+		} else if id, found = strings.CutPrefix(l.Path, "/live/"); found {
 		}
 	} else if host == "youtu.be" {
 		id = strings.TrimLeft(l.Path, "/")
